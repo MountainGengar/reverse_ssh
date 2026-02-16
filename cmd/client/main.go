@@ -44,6 +44,7 @@ var (
 	proxy       string
 	ignoreInput string
 	customSNI   string
+	selfPath    string
 	// golang can only embed strings using the compile time linker
 	useHostKerberos string
 	logLevel        string
@@ -54,7 +55,7 @@ var (
 )
 
 func printHelp() {
-	fmt.Println("usage: ", filepath.Base(os.Args[0]), "--[foreground|fingerprint|proxy|process_name] -d|--destination <server_address>")
+	fmt.Println("usage: ", filepath.Base(os.Args[0]), "--[foreground|fingerprint|proxy|process_name|self-path] -d|--destination <server_address>")
 	fmt.Println("\t\t-d or --destination\tServer connect back address (can be baked in)")
 	fmt.Println("\t\t--destination-file\tRead server connect back address as file")
 	fmt.Println("\t\t--foreground\tCauses the client to run without forking to background")
@@ -64,6 +65,7 @@ func printHelp() {
 	fmt.Println("\t\t--ntlm-proxy-creds\tNTLM proxy credentials in format DOMAIN\\USER:PASS")
 	fmt.Println("\t\t--process_name\tProcess name shown in tasklist/process list")
 	fmt.Println("\t\t--sni\tWhen using TLS set the clients requested SNI to this value")
+	fmt.Println("\t\t--self-path\tExplicit path to the client binary for re-exec on daemonize")
 	fmt.Println("\t\t--log-level\tChange logging output levels, [INFO,WARNING,ERROR,FATAL,DISABLED]")
 	fmt.Println("\t\t--version-string\tSSH version string to use, i.e SSH-VERSION, defaults to internal.Version-runtime.GOOS_runtime.GOARCH")
 	fmt.Println("\t\t--private-key-path\tOptional path to unencrypted SSH key to use for connecting")
@@ -82,6 +84,7 @@ func makeInitialSettings() (*client.Settings, error) {
 		Addr:                 destination,
 		ProxyUseHostKerberos: useHostKerberos == "true",
 		SNI:                  customSNI,
+		SelfPath:             selfPath,
 		VersionString:        versionString,
 	}
 
@@ -128,6 +131,11 @@ func main() {
 	proxyaddress, _ := line.GetArgString("proxy")
 	if len(proxyaddress) > 0 {
 		settings.ProxyAddr = proxyaddress
+	}
+
+	userSpecifiedSelfPath, err := line.GetArgString("self-path")
+	if err == nil {
+		settings.SelfPath = userSpecifiedSelfPath
 	}
 
 	userSpecifiedFingerprint, err := line.GetArgString("fingerprint")

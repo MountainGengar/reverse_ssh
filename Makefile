@@ -18,6 +18,8 @@ ifndef CGO_ENABLED
 	export CGO_ENABLED=0
 endif
 
+PYTHON ?= python3
+
 BUILD_FLAGS := -trimpath
 
 LDFLAGS += -X 'github.com/NHAS/reverse_ssh/internal.Version=$(shell git describe --tags)'
@@ -54,3 +56,7 @@ server:
 # Avoid duplicate entries
 	touch bin/authorized_controllee_keys
 	@grep -q "$$(cat internal/client/keys/private_key.pub)" bin/authorized_controllee_keys || cat internal/client/keys/private_key.pub >> bin/authorized_controllee_keys
+
+.PHONY: patch-go-esxi
+patch-go-esxi:
+	$(PYTHON) scripts/patch_go_esxi.py

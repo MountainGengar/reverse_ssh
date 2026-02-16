@@ -305,6 +305,7 @@ type Settings struct {
 	Fingerprint string
 	ProxyAddr   string
 	SNI         string
+	SelfPath    string
 
 	ProxyUseHostKerberos bool
 
